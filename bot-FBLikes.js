@@ -24,26 +24,18 @@ javascript:
  * SOFTWARE. */
 
 (function () {
-    /**document.querySelectorAll('span').forEach(function (v, i, a) {
-        if (v.textContent === 'See All Photos') {
-            v.click();
-        }
-    });**/
-    setTimeout(function () {
-        /**document.querySelector('[href^="https://www.facebook.com/photo.php?fbid="]').click();**/
-        document.querySelector('[href*="/photo"]').click();
-    }, 1000);
     var FBLikes = function () {
         setTimeout(function () {
-            try {
+            if (document.querySelector('[aria-label="Like"][class*="gs1a9yip"]')) {
                 document.querySelector('[aria-label="Like"][class*="gs1a9yip"]').click();
-            } catch {
-                document.querySelector('[aria-label="Next photo"]').click();
             }
-        }, 1500)
+        }, 500)
         setTimeout(function () {
-            document.querySelector('[aria-label="Next photo"]').click();
-        }, 2500)
+            if (document.querySelector('[aria-label="Next photo"]')) {
+                document.querySelector('[aria-label="Next photo"]').click();
+                FBLikes();
+            }
+        }, 1000)
     }
-    setInterval(FBLikes, 4500);
+    FBLikes();
 })();
