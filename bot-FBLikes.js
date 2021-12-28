@@ -24,13 +24,14 @@ javascript:
  * SOFTWARE. */
 
 (function () {
-    document.querySelectorAll('span').forEach(function (v, i, a) {
+    /**document.querySelectorAll('span').forEach(function (v, i, a) {
         if (v.textContent === 'See All Photos') {
             v.click();
         }
-    });
+    });**/
     setTimeout(function () {
-        document.querySelector('[href^="https://www.facebook.com/photo.php?fbid="]').click();
+        //document.querySelector('[href^="https://www.facebook.com/photo.php?fbid="]').click();
+        document.querySelector('[href*="/photo"]').click();
     }, 1000);
     var FBLikes = function () {
         setTimeout(function () {
