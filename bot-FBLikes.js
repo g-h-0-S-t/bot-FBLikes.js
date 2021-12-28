@@ -30,7 +30,7 @@ javascript:
         }
     });**/
     setTimeout(function () {
-        //document.querySelector('[href^="https://www.facebook.com/photo.php?fbid="]').click();
+        /**document.querySelector('[href^="https://www.facebook.com/photo.php?fbid="]').click();**/
         document.querySelector('[href*="/photo"]').click();
     }, 1000);
     var FBLikes = function () {
