@@ -6,7 +6,7 @@ A bot that automates Facebook Likes.
 
 Usage :  
 (1). Copy-Paste the code from **bot-FBLikes.js** and save it as a Browser Bookmark.  
-(2). Open the Facebook Account in the browser whose pictures you want to Like.  
+(2). Open the Facebook Account in the browser whose pictures you want to Like and goto their respective Album.  
 (3). Then click the bookmark that you generated in (1).  
 (4). If Bookmark Click doesn't work, just copy paste the code in the Browser Console and hit enter.  
 (5). To stop execution of the code, just refresh the browser.
