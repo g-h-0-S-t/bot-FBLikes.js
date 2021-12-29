@@ -29,13 +29,13 @@ javascript:
             if (document.querySelector('[aria-label="Like"][class*="gs1a9yip"]')) {
                 document.querySelector('[aria-label="Like"][class*="gs1a9yip"]').click();
             }
-        }, 500)
+        }, 2000)
         setTimeout(function () {
             if (document.querySelector('[aria-label="Next photo"]')) {
                 document.querySelector('[aria-label="Next photo"]').click();
                 FBLikes();
             }
-        }, 1000)
+        }, 4000)
     }
     FBLikes();
 })();
