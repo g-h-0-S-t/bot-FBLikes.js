@@ -1,4 +1,5 @@
 javascript:
+
 'use strict';
 
 /* MIT License
@@ -24,14 +25,14 @@ javascript:
  * SOFTWARE. */
 
 (() => {
-    const FBLikes = function () {
-        setTimeout(function () {
+    const FBLikes = () => {
+        setTimeout(() => {
             document?.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]')?.click();
         }, 2000);
-        setTimeout(function () {
+        setTimeout(() => {
             document?.querySelector('[aria-label="Next photo"]')?.click();
             FBLikes();
         }, 4000);
-    }
+    };
     FBLikes();
 })();
