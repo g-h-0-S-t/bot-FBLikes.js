@@ -23,18 +23,14 @@ javascript:
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 
-(function () {
-    var FBLikes = function () {
+(() => {
+    const FBLikes = function () {
         setTimeout(function () {
-            if (document.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]')) {
-                document.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]').click();
-            }
+            document?.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]')?.click();
         }, 2000);
         setTimeout(function () {
-            if (document.querySelector('[aria-label="Next photo"]')) {
-                document.querySelector('[aria-label="Next photo"]').click();
-                FBLikes();
-            }
+            document?.querySelector('[aria-label="Next photo"]')?.click();
+            FBLikes();
         }, 4000);
     }
     FBLikes();
