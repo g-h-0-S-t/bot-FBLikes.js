@@ -26,16 +26,16 @@ javascript:
 (function () {
     var FBLikes = function () {
         setTimeout(function () {
-            if (document.querySelector('[aria-label="Like"][class*="gs1a9yip"]')) {
-                document.querySelector('[aria-label="Like"][class*="gs1a9yip"]').click();
+            if (document.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]')) {
+                document.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]').click();
             }
-        }, 2000)
+        }, 2000);
         setTimeout(function () {
             if (document.querySelector('[aria-label="Next photo"]')) {
                 document.querySelector('[aria-label="Next photo"]').click();
                 FBLikes();
             }
-        }, 4000)
+        }, 4000);
     }
     FBLikes();
 })();
