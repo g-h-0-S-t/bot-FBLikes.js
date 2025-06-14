@@ -35,6 +35,7 @@ javascript:
      * POLL_INTERVAL: Interval for polling buttons in milliseconds (set low for speed)
      */
     const CONFIG = {
+        LOG_ENABLED: false,
         LIKE_BUTTON_SELECTOR: '[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]',
         REMOVE_REACTION_SELECTOR: '[aria-label="Remove Like"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Love"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Haha"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Care"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Sad"][class*="x1i10hfl x1qjc9v5"]',
         NEXT_BUTTON_SELECTOR: '[aria-label="Next photo"]',
@@ -59,6 +60,7 @@ javascript:
      * Includes operation counts and performance timestamp
      */
     const log = (message, data = {}) => {
+        if (!CONFIG.LOG_ENABLED) return;
         console.log(
             `%c[FBLikes ${new Date().toISOString()}] ${message}`,
             'color: #2196F3; font-weight: bold;',
