@@ -32,15 +32,13 @@ javascript:
      * LIKE_BUTTON_SELECTOR: Targets the Like button
      * REMOVE_REACTION_SELECTOR: Targets Remove Like/Love/Haha/Care buttons
      * NEXT_BUTTON_SELECTOR: Targets the Next photo button
-     * MAX_RETRIES: Number of retries for finding elements (set low for speed)
-     * RETRY_DELAY: Delay between retries in milliseconds (set low for speed)
+     * POLL_INTERVAL: Interval for polling buttons in milliseconds (set low for speed)
      */
     const CONFIG = {
         LIKE_BUTTON_SELECTOR: '[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]',
         REMOVE_REACTION_SELECTOR: '[aria-label="Remove Like"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Love"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Haha"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Care"][class*="x1i10hfl x1qjc9v5"]',
         NEXT_BUTTON_SELECTOR: '[aria-label="Next photo"]',
-        MAX_RETRIES: 5,
-        RETRY_DELAY: 200
+        POLL_INTERVAL: 0
     };
 
     /*
@@ -48,12 +46,12 @@ javascript:
      * operationCount: Tracks total operations
      * likedCount: Tracks successful likes
      * nextCount: Tracks successful next button clicks
-     * maxRetryLog: Limits retry log spam
+     * maxPollLog: Limits polling log spam
      */
     let operationCount = 0;
     let likedCount = 0;
     let nextCount = 0;
-    let maxRetryLog = 5;
+    let maxPollLog = 10;
 
     /*
      * Logging utility with timestamp and operation details
@@ -84,62 +82,36 @@ javascript:
 
     /*
      * Attempts to click an element identified by selector
-     * Retries up to maxRetries with minimal delay for speed
+     * Checks if element exists and is clickable before clicking
      * Parameters:
      * - selector: CSS selector for the element
      * - name: Descriptive name for logging
      * - onSuccess: Callback after successful click
-     * - onFail: Callback if element is missing after max retries
-     * - retry: Current retry attempt
-     * - maxRetries: Maximum number of retries
-     * - retryDelay: Delay between retries in milliseconds
      */
-    const clickWithRetry = (selector, name, onSuccess, onFail, retry = 1, maxRetries = CONFIG.MAX_RETRIES, retryDelay = CONFIG.RETRY_DELAY) => {
+    const tryClick = (selector, name, onSuccess) => {
         operationCount++;
-        log(`Attempting ${name} operation (retry ${retry})`, { selector });
+        log(`Attempting ${name} operation`, { selector });
 
         try {
             const element = document.querySelector(selector);
             if (!element) {
-                if (retry >= maxRetries) {
-                    log(`${name} not found after ${maxRetries} retries, taking fail path`);
-                    if (onFail) setTimeout(onFail, 0);
-                    return;
-                }
-                if (retry <= maxRetryLog) {
-                    log(`${name} not found, retrying...`);
-                }
-                setTimeout(() => clickWithRetry(selector, name, onSuccess, onFail, retry + 1, maxRetries, retryDelay), retryDelay);
-                return;
+                log(`${name} not found`);
+                return false;
             }
-
             if (!isElementClickable(element)) {
-                if (retry >= maxRetries) {
-                    log(`${name} found but not clickable after ${maxRetries} retries, taking fail path`);
-                    if (onFail) setTimeout(onFail, 0);
-                    return;
-                }
-                if (retry <= maxRetryLog) {
-                    log(`${name} found but not clickable, retrying...`, { element });
-                }
-                setTimeout(() => clickWithRetry(selector, name, onSuccess, onFail, retry + 1, maxRetries, retryDelay), retryDelay);
-                return;
+                log(`${name} found but not clickable`);
+                return false;
             }
-
             log(`${name} found and clickable, performing click`, { element });
             element.click();
             if (name.includes('Like')) likedCount++;
             if (name.includes('Next')) nextCount++;
             log(`${name} click successful`);
             setTimeout(onSuccess, 0);
+            return true;
         } catch (error) {
-            log(`${name} operation error, retrying...`, { error: error.message });
-            if (retry >= maxRetries) {
-                log(`${name} operation failed after ${maxRetries} retries`, { error: error.message });
-                if (onFail) setTimeout(onFail, 0);
-                return;
-            }
-            setTimeout(() => clickWithRetry(selector, name, onSuccess, onFail, retry + 1, maxRetries, retryDelay), retryDelay);
+            log(`${name} operation error`, { error: error.message });
+            return false;
         }
     };
 
@@ -152,66 +124,71 @@ javascript:
     };
 
     /*
-     * Main cycle to check reactions, like, and navigate to next photo
-     * Checks for Remove buttons first; if found, skips to next
-     * Otherwise, attempts to like with retries, then moves to next
+     * Polls for buttons (Remove or Like) until one is found and actionable
+     * If Remove button is found, clicks Next
+     * If Like button is found, clicks Like then Next
+     * Parameters:
+     * - pollCount: Tracks polling attempts for logging
      */
-    const runCycle = () => {
-        log('Starting new cycle');
+    const pollForButtons = (pollCount = 1) => {
+        operationCount++;
+        if (pollCount <= maxPollLog) {
+            log(`Polling for buttons (attempt ${pollCount})`);
+        } else if (pollCount === maxPollLog + 1) {
+            log(`Polling for buttons (suppressing future logs)`);
+        }
 
         /*
-         * Check for any Remove Like/Love/Haha/Care buttons
-         * If found, skip liking and move to next photo
+         * Check for Remove buttons first
+         * If found, click Next button
          */
         if (isPostReacted()) {
-            log('Post already reacted, moving to next');
-            clickWithRetry(
+            log('Post already reacted, attempting to move to next');
+            const clicked = tryClick(
                 CONFIG.NEXT_BUTTON_SELECTOR,
                 'Next photo button (already reacted)',
                 () => {
                     log('Cycle completed (already reacted), restarting');
                     setTimeout(runCycle, 0);
-                },
-                () => {
-                    log('Next button not found after max retries, restarting cycle');
-                    setTimeout(runCycle, 0);
                 }
             );
-            return;
+            if (clicked) return;
+        } else {
+            /*
+             * No Remove buttons, check for Like button
+             * If found, click Like then Next
+             */
+            const clicked = tryClick(
+                CONFIG.LIKE_BUTTON_SELECTOR,
+                'Like button',
+                () => {
+                    log('Like successful, attempting to move to next');
+                    tryClick(
+                        CONFIG.NEXT_BUTTON_SELECTOR,
+                        'Next photo button',
+                        () => {
+                            log('Cycle completed, restarting');
+                            setTimeout(runCycle, 0);
+                        }
+                    );
+                }
+            );
+            if (clicked) return;
         }
 
         /*
-         * No reaction found, attempt to like
-         * On success, move to next; on failure after retries, move to next
+         * No actionable buttons found, continue polling
          */
-        clickWithRetry(
-            CONFIG.LIKE_BUTTON_SELECTOR,
-            'Like button',
-            () => clickWithRetry(
-                CONFIG.NEXT_BUTTON_SELECTOR,
-                'Next photo button',
-                () => {
-                    log('Cycle completed, restarting');
-                    setTimeout(runCycle, 0);
-                },
-                () => {
-                    log('Next button not found after max retries, restarting cycle');
-                    setTimeout(runCycle, 0);
-                }
-            ),
-            () => clickWithRetry(
-                CONFIG.NEXT_BUTTON_SELECTOR,
-                'Next photo button (no-like fallback)',
-                () => {
-                    log('No-like fallback cycle completed, restarting');
-                    setTimeout(runCycle, 0);
-                },
-                () => {
-                    log('Next button not found after max retries, restarting cycle');
-                    setTimeout(runCycle, 0);
-                }
-            )
-        );
+        setTimeout(() => pollForButtons(pollCount + 1), CONFIG.POLL_INTERVAL);
+    };
+
+    /*
+     * Main cycle to initiate button polling
+     * Starts polling for Remove or Like buttons
+     */
+    const runCycle = () => {
+        log('Starting new cycle');
+        pollForButtons();
     };
 
     /*
