@@ -95,7 +95,7 @@ javascript:
             return false;
         }
         const divChildren = Array.from(container.children).filter(child => child.tagName === 'DIV');
-        const isReactable = divChildren.length === 3;
+        const isReactable = divChildren.length >= 2;
         log(`Reaction container found, ${divChildren.length} div children, reactable: ${isReactable}`);
         return isReactable;
     };
