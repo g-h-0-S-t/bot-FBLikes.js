@@ -1,5 +1,3 @@
-javascript:
-
 'use strict';
 
 /*
@@ -32,6 +30,7 @@ javascript:
      * LIKE_BUTTON_SELECTOR: Targets the Like button
      * REMOVE_REACTION_SELECTOR: Targets Remove Like/Love/Haha/Care buttons
      * NEXT_BUTTON_SELECTOR: Targets the Next photo button
+     * REACTION_CONTAINER_SELECTOR: Targets the container with reaction buttons
      * POLL_INTERVAL: Interval for polling buttons in milliseconds (set low for speed)
      */
     const CONFIG = {
@@ -39,6 +38,7 @@ javascript:
         LIKE_BUTTON_SELECTOR: '[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]',
         REMOVE_REACTION_SELECTOR: '[aria-label="Remove Like"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Love"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Haha"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Care"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Sad"][class*="x1i10hfl x1qjc9v5"]',
         NEXT_BUTTON_SELECTOR: '[aria-label="Next photo"]',
+        REACTION_CONTAINER_SELECTOR: '.x1q0g3np.xjkvuk6',
         POLL_INTERVAL: 0
     };
 
@@ -80,6 +80,22 @@ javascript:
      */
     const isElementClickable = (element) => {
         return element && element.offsetParent !== null && !element.disabled;
+    };
+
+    /*
+     * Checks if the post is reactable by verifying the reaction container has exactly 3 div children
+     * Returns true if the container exists and has 3 div children
+     */
+    const isPostReactable = () => {
+        const container = document.querySelector(CONFIG.REACTION_CONTAINER_SELECTOR);
+        if (!container) {
+            log('Reaction container not found');
+            return false;
+        }
+        const divChildren = Array.from(container.children).filter(child => child.tagName === 'DIV');
+        const isReactable = divChildren.length === 3;
+        log(`Reaction container found, ${divChildren.length} div children, reactable: ${isReactable}`);
+        return isReactable;
     };
 
     /*
@@ -128,7 +144,8 @@ javascript:
     /*
      * Polls for buttons (Remove or Like) until one is found and actionable
      * If Remove button is found, clicks Next
-     * If Like button is found, clicks Like then Next
+     * If Like button is found and post is reactable, clicks Like then Next
+     * If post is not reactable, clicks Next
      * Parameters:
      * - pollCount: Tracks polling attempts for logging
      */
@@ -155,9 +172,9 @@ javascript:
                 }
             );
             if (clicked) return;
-        } else {
+        } else if (isPostReactable()) {
             /*
-             * No Remove buttons, check for Like button
+             * Post is reactable and not reacted, check for Like button
              * If found, click Like then Next
              */
             const clicked = tryClick(
@@ -173,6 +190,20 @@ javascript:
                             setTimeout(runCycle, 0);
                         }
                     );
+                }
+            );
+            if (clicked) return;
+        } else {
+            /*
+             * Post is not reactable, click Next
+             */
+            log('Post not reactable, attempting to move to next');
+            const clicked = tryClick(
+                CONFIG.NEXT_BUTTON_SELECTOR,
+                'Next photo button (not reactable)',
+                () => {
+                    log('Cycle completed (not reactable), restarting');
+                    setTimeout(runCycle, 0);
                 }
             );
             if (clicked) return;
