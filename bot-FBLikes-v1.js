@@ -30,7 +30,7 @@ javascript:
             document?.querySelector('[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]')?.click();
         }, 2000);
         setTimeout(() => {
-            document?.querySelector('[aria-label="Next photo"]')?.click();
+            document?.querySelectorAll('[aria-label^="Next"]')?.forEach((v)=>v.click());
             FBLikes();
         }, 4000);
     };
