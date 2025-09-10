@@ -176,7 +176,8 @@ javascript:
                 () => {
                     log('Cycle completed (already reacted), restarting');
                     setTimeout(runCycle, 0);
-                }
+                },
+                true
             );
             if (clicked) return;
         } else if (isPostReactable()) {
