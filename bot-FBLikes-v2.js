@@ -39,7 +39,7 @@ javascript:
         LOG_ENABLED: false,
         LIKE_BUTTON_SELECTOR: '[aria-label="Like"][class*="x1i10hfl x1qjc9v5"]',
         REMOVE_REACTION_SELECTOR: '[aria-label="Remove Like"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Love"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Haha"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Care"][class*="x1i10hfl x1qjc9v5"],[aria-label="Remove Sad"][class*="x1i10hfl x1qjc9v5"]',
-        NEXT_BUTTON_SELECTOR: '[aria-label="Next photo"]',
+        NEXT_BUTTON_SELECTOR: '[aria-label^="Next"]',
         REACTION_CONTAINER_SELECTOR: '.x1q0g3np.xjkvuk6',
         POLL_INTERVAL: 0
     };
@@ -108,7 +108,7 @@ javascript:
      * - name: Descriptive name for logging
      * - onSuccess: Callback after successful click
      */
-    const tryClick = (selector, name, onSuccess) => {
+    const tryClick = (selector, name, onSuccess, matchAll) => {
         operationCount++;
         log(`Attempting ${name} operation`, { selector });
 
@@ -123,7 +123,12 @@ javascript:
                 return false;
             }
             log(`${name} found and clickable, performing click`, { element });
-            element.click();
+            if (matchAll) {
+                document?.querySelectorAll(selector)?.forEach((v)=>v.click());
+            }
+            else {
+             element.click();   
+            }
             if (name.includes('Like')) likedCount++;
             if (name.includes('Next')) nextCount++;
             log(`${name} click successful`);
